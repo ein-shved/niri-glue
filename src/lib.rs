@@ -17,6 +17,10 @@ pub use clap::{Parser, ValueEnum};
 use niri_ipc::socket::Socket;
 use std::path::PathBuf;
 
+mod layout;
+
+pub use layout::{Layout, SwitchLayout};
+
 /// Top-level arguments structure
 #[derive(Parser, Debug)]
 #[command(
@@ -49,6 +53,18 @@ pub enum Command {
     /// unavailable.
     #[command(about, long_about)]
     Test(TestSocket),
+
+    /// Keyboard layout monitor.
+    ///
+    /// Produces to stdout messages about keyboard layout actions.
+    #[command(about, long_about)]
+    Layout(Layout),
+
+    /// Keyboard layout switcher.
+    ///
+    /// Switches the keyboard layout.
+    #[command(about, long_about)]
+    SwitchLayout(SwitchLayout),
 }
 
 /// The list of available formats of output messages
@@ -73,6 +89,8 @@ impl Args {
             Socket::connect().unwrap()
         };
         match self.command {
+            Command::Layout(cmd) => cmd.run(socket, self.format),
+            Command::SwitchLayout(cmd) => cmd.run(socket, self.format),
             Command::Test(cmd) => cmd.run(socket, self.format),
         }
     }
